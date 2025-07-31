@@ -1,0 +1,3 @@
+#taking user input and printing it in reverse
+x = input("enter user input: ")
+print(x[::-1])

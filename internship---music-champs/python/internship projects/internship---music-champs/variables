@@ -1,0 +1,5 @@
+#swapping variables with user input
+a = input("enter the value for a: ")
+b = input("enter the value for b: ")
+print("a =", b)
+print("b =", a)

@@ -1,0 +1,18 @@
+#calculator program 
+num1 = int(input("Enter a number: "))
+num2 = int(input("Enter a number: "))
+operator = input("choose operater: +, -, *, /: ")
+if operator == '+':
+     result = num1 + num2
+     print(result)
+elif operator == '-':
+     result = num1 - num2
+     print(result)
+elif operator == '*':
+     result = num1 * num2
+     print(result)
+elif operator == '/':
+     result = num1/num2
+     print(result)
+else:
+     print("invalid input")
