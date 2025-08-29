@@ -1,0 +1,114 @@
+import sqlite3
+
+class LibraryItem:
+    def __init__(self, item_id, name):
+        self.item_id = item_id
+        self.name = name
+
+    def __str__(self):
+        return f"ID: {self.item_id}, Name: {self.name}"
+
+class Book(LibraryItem):
+    total_books = 0
+
+    def __init__(self, item_id, name, author):
+        super().__init__(item_id, name)
+        self.author = author
+        self.is_available = True
+        Book.total_books += 1
+
+    def __str__(self):
+        return f"Book ID: {self.item_id}, Title: {self.name}, Author: {self.author}, Available: {self.is_available}"
+
+class User(LibraryItem):
+    def __init__(self, item_id, name, email):
+        super().__init__(item_id, name)
+        self.email = email
+
+class Library:
+    def __init__(self, db_name="simple_library.db"):
+        self._conn = sqlite3.connect(db_name)
+        self._cursor = self._conn.cursor()
+        self._create_tables()
+
+    def _create_tables(self):
+        self._cursor.execute('''
+            CREATE TABLE IF NOT EXISTS books (
+                book_id INTEGER PRIMARY KEY,
+                title TEXT,
+                author TEXT,
+                is_available BOOLEAN
+            )
+        ''')
+        self._cursor.execute('''
+            CREATE TABLE IF NOT EXISTS users (
+                user_id INTEGER PRIMARY KEY,
+                name TEXT,
+                email TEXT
+            )
+        ''')
+        self._conn.commit()
+
+    def add_book(self, book_id, title, author):
+        self._cursor.execute("INSERT INTO books (book_id, title, author, is_available) VALUES (?, ?, ?, ?)",
+                            (book_id, title, author, True))
+        self._conn.commit()
+        print("Book added.")
+
+    def add_user(self, user_id, name, email):
+        self._cursor.execute("INSERT INTO users (user_id, name, email) VALUES (?, ?, ?)",
+                            (user_id, name, email))
+        self._conn.commit()
+        print("User added.")
+
+    def borrow_book(self, user_id, book_id):
+        self._cursor.execute("SELECT is_available FROM books WHERE book_id = ?", (book_id,))
+        result = self._cursor.fetchone()
+        if result and result[0]:
+            self._cursor.execute("UPDATE books SET is_available = ? WHERE book_id = ?", (False, book_id))
+            self._conn.commit()
+            print("Book borrowed.")
+        else:
+            print("Book not available.")
+
+    def display_books(self):
+        self._cursor.execute("SELECT * FROM books")
+        books = self._cursor.fetchall()
+        if books:
+            for book in books:
+                print(f"ID: {book[0]}, Title: {book[1]}, Author: {book[2]}, Available: {book[3]}")
+        else:
+            print("No books.")
+
+    def __del__(self):
+        self._conn.close()
+
+def main():
+    library = Library()
+    while True:
+        print("\n1. Add Book\n2. Add User\n3. Borrow Book\n4. Display Books\n5. Exit")
+        choice = input("Choose (1-5): ")
+        if choice == "1":
+            book_id = int(input("Book ID: "))
+            title = input("Title: ")
+            author = input("Author: ")
+            library.add_book(book_id, title, author)
+        elif choice == "2":
+            user_id = int(input("User ID: "))
+            name = input("Name: ")
+            email = input("Email: ")
+            library.add_user(user_id, name, email)
+        elif choice == "3":
+            user_id = int(input("User ID: "))
+            book_id = int(input("Book ID: "))
+            library.borrow_book(user_id, book_id)
+        elif choice == "4":
+            library.display_books()
+        elif choice == "5":
+            print("Exiting.")
+            break
+        else:
+            print("Invalid choice.")
+
+if __name__ == "__main__":
+    main()
